@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  fossbilling:
+    image: fossbilling/fossbilling:latest  # Consider using a specific version
+    container_name: fossbilling_server
+    restart: always
+    ports:
+      - "8081:80"
+    volumes:
+      - fossbilling_data:/var/www/html
+    environment:
+      - DB_DRIVER=mysql  # Ensure the database driver is set
+      - DB_HOST=db
+      - DB_USER=root
+      - DB_PASS=root
+      - DB_NAME=fossbilling
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: mysql:5.7
+    container_name: fossbilling_db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: fossbilling
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      retries: 5
+      start_period: 20s  # Added to allow MySQL time to start
+    ports:
+      - "3306:3306"  # Optional, for external database access
+    volumes:
+      - db_data:/var/lib/mysql
+
+volumes:
+  fossbilling_data:
+  db_data:
+
