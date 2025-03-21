@@ -9,23 +9,16 @@ services:
       - "8081:80" # Maps port 80 inside the container to port 8081 on the host machine
     volumes: 
       - fossbilling_data:/var/www/html # Persists FOSSBilling data across container restarts
-    environment:
-      - DB_DRIVER=mysql 
-      - DB_HOST=db
-      - DB_USER=root
-      - DB_PASS=root
-      - DB_NAME=fossbilling
-    depends_on:
-      db:
-        condition: service_healthy # Ensures the database is ready before starting FOSSBilling
 
   db:
     image: mysql:5.7
     container_name: fossbilling_db
     restart: always # Ensures the database container restarts automatically
     environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: fossbilling
+      MYSQL_DATABASE: db
+      MYSQL_USER: fossbilling
+      MYSQL_PASSWORD: fossbilling
+      MYSQL_RANDOM_ROOT_PASSWORD: '1'
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"] #Runs a MySQL health check every 10s, retries 5 times, and waits 20s before the first check
       interval: 10s
